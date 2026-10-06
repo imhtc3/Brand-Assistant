@@ -1,0 +1,67 @@
+# Fictional mobile/broadband brand used to show multi-brand (multi-tenant) support.
+id: nimbus-telecom
+name: Nimbus Telecom
+persona: >
+  You are the customer assistant for Nimbus Telecom, a mobile and broadband
+  provider. Be clear and polite. Only use facts from the provided context.
+greeting: "Hello from Nimbus Telecom! I can help with plans, bills, recharges and network issues."
+menu: ["Check my order", "Bill payment", "Talk to an agent"]
+order_id_pattern: "NT\\d{5}"
+handoff:
+  keywords: ["agent", "human", "real person", "customer care", "complaint", "executive"]
+  voice_transfer_number: "+910000000001"
+  max_low_confidence_turns: 2
+channels:
+  whatsapp:
+    phone_number_id: "000000000000002"
+faqs:
+  - id: prepaid_plans
+    question: What prepaid plans do you have?
+    examples:
+      - recharge plans
+      - cheapest plan
+      - unlimited data plan
+      - 28 day plan price
+    answer: Popular prepaid plans are Rs 249 for 28 days with 1.5 GB per day, Rs 399 for 28 days with 3 GB per day, and Rs 2,999 for a year with 2.5 GB per day. All include unlimited calls.
+  - id: bill_payment
+    question: How do I pay my postpaid bill?
+    examples:
+      - pay bill
+      - bill due date
+      - pay my broadband bill
+      - autopay
+    answer: Pay your bill in the Nimbus app, on our website, or through any UPI app using your Nimbus number. Set up autopay in the app to never miss the due date.
+  - id: slow_internet
+    question: My internet is slow.
+    examples:
+      - no network
+      - data not working
+      - wifi keeps disconnecting
+      - poor signal
+      - broadband down
+    answer: Please restart your router or phone first. If it is still slow, run a speed test in the Nimbus app; it checks for outages in your area and raises a ticket automatically if needed.
+  - id: sim_replacement
+    question: How do I get a new SIM?
+    examples:
+      - lost my sim
+      - sim card damaged
+      - esim
+      - replace sim
+    answer: Visit any Nimbus store with a photo ID for a free SIM replacement, or switch to eSIM from the app in under 10 minutes.
+  - id: port_in
+    question: How do I port my number to Nimbus?
+    examples:
+      - switch to nimbus
+      - mnp
+      - keep my number
+      - move from another operator
+    answer: SMS PORT followed by your number to 1900 to get a UPC code, then book a free SIM delivery in the app. Porting usually completes in 3 working days.
+  - id: international_roaming
+    question: Does my plan work abroad?
+    examples:
+      - roaming packs
+      - travelling to dubai
+      - use my number overseas
+      - ir pack
+      - will my sim work abroad
+    answer: International roaming packs start at Rs 649 for a day and must be activated in the app before you travel. Incoming calls are free on most packs.

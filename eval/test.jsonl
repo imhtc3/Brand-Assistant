@@ -1,0 +1,48 @@
+{"brand": "kirana-express", "text": "when will the rider reach", "expected": "faq:delivery_time"}
+{"brand": "kirana-express", "text": "eta for groceries?", "expected": "faq:delivery_time"}
+{"brand": "kirana-express", "text": "why did you charge 25 rupees delivery", "expected": "faq:delivery_fee"}
+{"brand": "kirana-express", "text": "is delivery free", "expected": "faq:delivery_fee"}
+{"brand": "kirana-express", "text": "money not refunded after cancellation", "expected": "faq:refund_policy"}
+{"brand": "kirana-express", "text": "how many days does refund take", "expected": "faq:refund_policy"}
+{"brand": "kirana-express", "text": "tomatoes were rotten", "expected": "faq:damaged_item"}
+{"brand": "kirana-express", "text": "one item is missing from my bag", "expected": "faq:damaged_item"}
+{"brand": "kirana-express", "text": "please cancel my order", "expected": "faq:cancel_order"}
+{"brand": "kirana-express", "text": "ordered by mistake how to cancel", "expected": "faq:cancel_order"}
+{"brand": "kirana-express", "text": "is cash on delivery available", "expected": "faq:payment_methods"}
+{"brand": "kirana-express", "text": "can i pay with my credit card", "expected": "faq:payment_methods"}
+{"brand": "kirana-express", "text": "do you deliver to noida sector 62", "expected": "faq:service_area"}
+{"brand": "kirana-express", "text": "which cities do you serve", "expected": "faq:service_area"}
+{"brand": "kirana-express", "text": "are you open at 2 am", "expected": "faq:store_hours"}
+{"brand": "kirana-express", "text": "what time do you open in the morning", "expected": "faq:store_hours"}
+{"brand": "kirana-express", "text": "discount code not working", "expected": "faq:coupon_issue"}
+{"brand": "kirana-express", "text": "coupn not aplied", "expected": "faq:coupon_issue"}
+{"brand": "kirana-express", "text": "what do i get with kirana plus", "expected": "faq:membership"}
+{"brand": "kirana-express", "text": "is the subscription worth it", "expected": "faq:membership"}
+{"brand": "kirana-express", "text": "status of KE10231", "expected": "order_status"}
+{"brand": "kirana-express", "text": "ke10233 delivered?", "expected": "order_status"}
+{"brand": "kirana-express", "text": "where is my order", "expected": "ask_order_id"}
+{"brand": "kirana-express", "text": "i want to talk to a human", "expected": "handoff"}
+{"brand": "kirana-express", "text": "this bot is useless", "expected": "handoff"}
+{"brand": "kirana-express", "text": "hi", "expected": "greeting"}
+{"brand": "kirana-express", "text": "book a flight to goa", "expected": "none"}
+{"brand": "kirana-express", "text": "what is your ceo's name", "expected": "none"}
+{"brand": "kirana-express", "text": "how do i make biryani", "expected": "none"}
+{"brand": "kirana-express", "text": "can you help with my homework", "expected": "none"}
+{"brand": "kirana-express", "text": "are you a robot", "expected": "none"}
+{"brand": "kirana-express", "text": "what is the stock price today", "expected": "none"}
+{"brand": "nimbus-telecom", "text": "cheapest monthly recharge", "expected": "faq:prepaid_plans"}
+{"brand": "nimbus-telecom", "text": "yearly plan price", "expected": "faq:prepaid_plans"}
+{"brand": "nimbus-telecom", "text": "when is my bill due", "expected": "faq:bill_payment"}
+{"brand": "nimbus-telecom", "text": "set up auto debit for bill", "expected": "faq:bill_payment"}
+{"brand": "nimbus-telecom", "text": "internet very slow at home", "expected": "faq:slow_internet"}
+{"brand": "nimbus-telecom", "text": "no signal in my area", "expected": "faq:slow_internet"}
+{"brand": "nimbus-telecom", "text": "need a duplicate sim", "expected": "faq:sim_replacement"}
+{"brand": "nimbus-telecom", "text": "how to activate esim", "expected": "faq:sim_replacement"}
+{"brand": "nimbus-telecom", "text": "port my jio number to nimbus", "expected": "faq:port_in"}
+{"brand": "nimbus-telecom", "text": "roaming pack for usa trip", "expected": "faq:international_roaming"}
+{"brand": "nimbus-telecom", "text": "where is my order NT55002", "expected": "order_status"}
+{"brand": "nimbus-telecom", "text": "talk to an executive", "expected": "handoff"}
+{"brand": "nimbus-telecom", "text": "good morning", "expected": "greeting"}
+{"brand": "nimbus-telecom", "text": "recommend a good movie", "expected": "none"}
+{"brand": "nimbus-telecom", "text": "who is the prime minister", "expected": "none"}
+{"brand": "nimbus-telecom", "text": "sell me a laptop", "expected": "none"}

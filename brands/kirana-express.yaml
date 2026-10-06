@@ -1,0 +1,102 @@
+# Fictional grocery-delivery brand used for demos and evaluation.
+id: kirana-express
+name: Kirana Express
+persona: >
+  You are the support assistant for Kirana Express, a 20-minute grocery delivery
+  app. Be warm, brief and practical. Never invent prices, policies or timelines
+  that are not in the provided context.
+greeting: "Hi! I'm the Kirana Express assistant. I can track orders, explain refunds and delivery, or connect you to our team."
+menu: ["Track my order", "Refund policy", "Talk to an agent"]
+order_id_pattern: "KE\\d{5}"
+handoff:
+  keywords: ["agent", "human", "real person", "customer care", "talk to someone", "executive"]
+  voice_transfer_number: "+910000000000"
+  max_low_confidence_turns: 2
+channels:
+  whatsapp:
+    phone_number_id: "000000000000001"
+faqs:
+  - id: delivery_time
+    question: How long does delivery take?
+    examples:
+      - when will my groceries arrive
+      - how fast do you deliver
+      - delivery time
+      - is it really 20 minutes
+    answer: Most orders arrive in 15 to 25 minutes. During heavy rain or peak hours it can take up to 45 minutes, and the app shows a live ETA once a rider is assigned.
+  - id: delivery_fee
+    question: Is there a delivery charge?
+    examples:
+      - delivery fee
+      - extra charges on delivery
+      - do you charge for delivery
+      - minimum order for free delivery
+      - small cart fee
+    answer: Delivery is free on orders above Rs 199. Below that there is a Rs 25 delivery fee, plus a Rs 15 small-cart fee on orders under Rs 99.
+  - id: refund_policy
+    question: How do refunds work?
+    examples:
+      - refund policy
+      - when will I get my money back
+      - refund status
+      - how many days for refund
+    answer: Refunds go back to your original payment method within 5 to 7 working days, or instantly to your Kirana wallet if you choose that option in the app.
+  - id: damaged_item
+    question: I received a damaged or wrong item.
+    examples:
+      - item was broken
+      - got the wrong product
+      - eggs were cracked
+      - missing item in my order
+      - expired product delivered
+      - packet was spoiled or leaking
+    answer: Sorry about that! Open the order in the app, tap Help, choose the item and upload a photo within 48 hours. Approved claims are refunded or replaced the same day.
+  - id: cancel_order
+    question: Can I cancel my order?
+    examples:
+      - cancel my order
+      - how do I cancel
+      - I ordered by mistake
+    answer: You can cancel free of charge until the order is packed. After that, cancellation is not possible, but you can refuse delivery and the amount is refunded.
+  - id: payment_methods
+    question: What payment methods do you accept?
+    examples:
+      - can I pay with UPI
+      - cash on delivery available
+      - do you take credit cards
+      - payment options
+    answer: We accept UPI, debit and credit cards, net banking, the Kirana wallet, and cash on delivery for orders up to Rs 2,000.
+  - id: service_area
+    question: Which areas do you deliver to?
+    examples:
+      - do you deliver to my area
+      - is my pincode serviceable
+      - which cities are you in
+      - service locations
+      - are you available in my city
+    answer: We currently deliver in Delhi NCR, Bengaluru, Mumbai and Hyderabad. Enter your pincode on the home screen to check your exact location.
+  - id: store_hours
+    question: What are your working hours?
+    examples:
+      - are you open now
+      - timings
+      - late night delivery
+      - what time do you close
+      - night delivery hours
+    answer: We deliver every day from 6 AM to 1 AM. Some dark stores in Bengaluru and Gurugram run 24x7.
+  - id: coupon_issue
+    question: My coupon code is not working.
+    examples:
+      - promo code not applying
+      - discount not applied
+      - coupon invalid
+      - offer code error
+    answer: Coupons work only on eligible items and above the minimum cart value shown on the offer. Each code can be used once per account. If it still fails, share the code and we will check it.
+  - id: membership
+    question: What is Kirana Plus?
+    examples:
+      - kirana plus benefits
+      - membership price
+      - subscription plan
+      - is plus worth it
+    answer: Kirana Plus costs Rs 99 a month and gives free delivery on every order, no small-cart fee, and 2 percent cashback in your Kirana wallet.

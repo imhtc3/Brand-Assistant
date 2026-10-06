@@ -1,0 +1,12 @@
+{
+  "kirana-express": {
+    "KE10231": {"status": "out_for_delivery", "eta_minutes": 8, "items": ["Amul milk 1L", "Brown bread", "6 eggs"]},
+    "KE10232": {"status": "packed", "eta_minutes": 18, "items": ["Basmati rice 5kg"]},
+    "KE10233": {"status": "delivered", "items": ["Bananas 1 dozen", "Curd 400g"]},
+    "KE10234": {"status": "cancelled", "items": ["Atta 10kg"]}
+  },
+  "nimbus-telecom": {
+    "NT55001": {"status": "out_for_delivery", "eta_minutes": 120, "items": ["Nimbus SIM (eSIM-ready)"]},
+    "NT55002": {"status": "placed", "items": ["Fiber router installation"]}
+  }
+}

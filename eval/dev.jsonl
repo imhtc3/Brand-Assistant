@@ -1,0 +1,34 @@
+{"brand": "kirana-express", "text": "how long till my stuff gets here", "expected": "faq:delivery_time"}
+{"brand": "kirana-express", "text": "why is delivery taking so long today", "expected": "faq:delivery_time"}
+{"brand": "kirana-express", "text": "do i have to pay extra for delivery", "expected": "faq:delivery_fee"}
+{"brand": "kirana-express", "text": "what is the minimum order value", "expected": "faq:delivery_fee"}
+{"brand": "kirana-express", "text": "my refund hasnt come yet", "expected": "faq:refund_policy"}
+{"brand": "kirana-express", "text": "refnd kab milega", "expected": "faq:refund_policy"}
+{"brand": "kirana-express", "text": "the milk packet was leaking", "expected": "faq:damaged_item"}
+{"brand": "kirana-express", "text": "you sent me the wrong brand of atta", "expected": "faq:damaged_item"}
+{"brand": "kirana-express", "text": "i want to cancel what i just ordered", "expected": "faq:cancel_order"}
+{"brand": "kirana-express", "text": "can i pay by paytm upi", "expected": "faq:payment_methods"}
+{"brand": "kirana-express", "text": "do you deliver in pune", "expected": "faq:service_area"}
+{"brand": "kirana-express", "text": "is kirana available in chennai", "expected": "faq:service_area"}
+{"brand": "kirana-express", "text": "can i order at midnight", "expected": "faq:store_hours"}
+{"brand": "kirana-express", "text": "promo code says invalid", "expected": "faq:coupon_issue"}
+{"brand": "kirana-express", "text": "how much does plus cost", "expected": "faq:membership"}
+{"brand": "kirana-express", "text": "where is my order KE10232", "expected": "order_status"}
+{"brand": "kirana-express", "text": "order status pls", "expected": "ask_order_id"}
+{"brand": "kirana-express", "text": "connect me to customer care", "expected": "handoff"}
+{"brand": "kirana-express", "text": "hello", "expected": "greeting"}
+{"brand": "kirana-express", "text": "what is the meaning of life", "expected": "none"}
+{"brand": "kirana-express", "text": "who won the cricket match", "expected": "none"}
+{"brand": "kirana-express", "text": "write me a poem", "expected": "none"}
+{"brand": "kirana-express", "text": "do you sell iphones", "expected": "none"}
+{"brand": "kirana-express", "text": "what is the capital of france", "expected": "none"}
+{"brand": "nimbus-telecom", "text": "which recharge gives 3gb daily", "expected": "faq:prepaid_plans"}
+{"brand": "nimbus-telecom", "text": "how to pay postpaid bill online", "expected": "faq:bill_payment"}
+{"brand": "nimbus-telecom", "text": "my 4g is not working since morning", "expected": "faq:slow_internet"}
+{"brand": "nimbus-telecom", "text": "my sim got lost yesterday", "expected": "faq:sim_replacement"}
+{"brand": "nimbus-telecom", "text": "i want to switch from airtel to nimbus", "expected": "faq:port_in"}
+{"brand": "nimbus-telecom", "text": "going to singapore will my sim work", "expected": "faq:international_roaming"}
+{"brand": "nimbus-telecom", "text": "track order NT55001", "expected": "order_status"}
+{"brand": "nimbus-telecom", "text": "i want to file a complaint", "expected": "handoff"}
+{"brand": "nimbus-telecom", "text": "tell me a joke", "expected": "none"}
+{"brand": "nimbus-telecom", "text": "what is the weather in delhi", "expected": "none"}

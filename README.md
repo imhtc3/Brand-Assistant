@@ -1,116 +1,152 @@
-# Brand Assistant: one AI assistant, every channel
+# brand-assistant
 
-A multi-brand customer assistant that runs on **WhatsApp**, **RCS** and **voice** from a single conversation engine. Each brand (client) is configured in one YAML file: persona, FAQ knowledge base, menu, order-ID format and handoff rules. No code changes are needed to onboard a new brand.
+A customer support bot for brands that works on WhatsApp, RCS and phone calls, all from the same code.
 
-Built to mirror how conversational-AI teams deploy assistants for enterprise brands: integrate the channel, own the prompts and knowledge base, launch, then use the analytics to grow what the client uses.
+I wanted to understand how companies actually run AI assistants for lots of different brands at once. The bot itself is only part of it. You also have to deal with each messaging platform's webhooks, stop the bot from making up refund policies, hand angry customers to a human, and show the brand whether the bot is helping at all. So I built a small version of that whole setup.
+
+There are two made-up brands in `brands/` to test with: **Kirana Express** (grocery delivery) and **Nimbus Telecom** (mobile and broadband). Each brand is just a YAML file, so adding a third one doesn't need any code changes.
+
+## How it works
+
+Every channel gets converted into the same simple call: *this brand, this user, this message*. The engine decides what to do, and the channel code turns the reply back into whatever format WhatsApp, RCS or Twilio expects.
 
 ```mermaid
 flowchart LR
-    WA[WhatsApp Cloud API] -->|webhook + HMAC check| A
-    RCS[Google RBM / RCS] -->|Pub/Sub push| A
-    V[Twilio Voice] -->|speech-to-text + signature check| A
-    W[Web / test] --> A
-    A[Channel adapters] --> E[Conversation engine]
-    E --> D{Decide}
-    D -->|order ID| T[Order API tool]
-    D -->|question| R[TF-IDF FAQ retrieval]
-    R -->|confident| L[Optional LLM rephrase, grounded]
-    R -->|unsure| C[Clarify with buttons]
-    D -->|angry / asks / 2 misses| H[Human handoff]
-    E --> S[(SQLite: sessions, dedupe, PII-redacted log)]
-    S --> I[Insights API: containment, handoffs, top unanswered]
+    WA[WhatsApp] --> A[channel adapters]
+    RCS[RCS] --> A
+    V[Phone call via Twilio] --> A
+    A --> E[engine]
+    E -->|has an order ID| T[order lookup]
+    E -->|question| R[FAQ search]
+    R -->|sure| ANS[answer]
+    R -->|not sure| C["did you mean...?" buttons]
+    E -->|wants a human / annoyed / bot keeps failing| H[handoff]
+    E --> DB[(SQLite log)]
+    DB --> I[insights for the brand]
 ```
 
-## What it does
+For each message the engine checks things in this order:
 
-| Capability | How |
+1. Have I seen this message ID already? WhatsApp retries webhooks, so duplicates get ignored.
+2. Is this person already waiting for a human? Then don't jump back in.
+3. Are they asking for an agent, or clearly annoyed ("this bot is useless")? Hand off.
+4. Is it just "hi" or "thanks"? Reply and show the menu.
+5. Does it contain an order ID like `KE10231`? Look it up. If they ask "where's my order?" without one, ask for it and remember that on the next message.
+6. Otherwise search the brand's FAQs.
+
+## The part I spent the most time on: not giving wrong answers
+
+A support bot that confidently gives the wrong refund policy is worse than no bot. So the FAQ search has two cutoffs instead of one:
+
+- **score ≥ 0.40**: answer it
+- **0.25 to 0.40**: ask "did you mean one of these?" with buttons
+- **below 0.25**: say it didn't understand. If that happens twice in a row, pass the user to a human.
+
+The search is TF-IDF on both words and character chunks, so typos like "refnd" or "coupn" still match. Indian users mix Hindi into chat a lot, so there's a small dictionary that maps words like *kab*, *milega* and *kahan* (and shorthand like *cod*, *pls*) to English before searching.
+
+An LLM is optional. If you set an API key, it rewrites the FAQ answer so it sounds more natural, but it's only allowed to use the FAQ text. If the API is down, slow, or replies that the FAQ doesn't cover the question, the bot just sends the original FAQ answer. The bot works with no key at all.
+
+## How well it works
+
+I wrote two sets of test messages by hand, worded differently from the FAQs and including typos, Hinglish and off-topic stuff like "write me a poem":
+
+- `eval/dev.jsonl` (34 messages) is what I tuned the thresholds and FAQ examples on.
+- `eval/test.jsonl` (48 messages) I kept aside and only ran at the end.
+
+Results on the test set:
+
+| | |
 |---|---|
-| **3 channels, 1 engine** | WhatsApp (text + reply buttons), RCS (suggestion chips), voice (Twilio TwiML `<Gather>` speech loop). Each adapter converts platform payloads to `handle(brand, user, channel, text)` and back. |
-| **Multi-brand** | `brands/*.yaml`. Two demo brands included: a grocery app and a telecom. Knowledge bases are isolated per brand. |
-| **Order tracking with slot filling** | "Where's my order?" → asks for the ID → looks it up on the next turn. Releases the slot if the user changes topic. |
-| **FAQ answers that don't guess** | TF-IDF (word + character n-grams for typos) with two thresholds: answer, ask a "Did you mean…" question with buttons, or fall back. Common Hinglish/chat shorthand (`kab`, `milega`, `cod`, `pls`) is normalised. |
-| **Optional LLM, never required** | If `LLM_API_KEY` is set, answers are rephrased by any OpenAI-compatible model (OpenAI, Groq, Gemini) **using only the approved FAQ text**. If the model is down or says the context doesn't cover it, the approved answer is sent instead. |
-| **Human handoff** | On request ("agent", "customer care"), on frustration ("useless"), or after 2 consecutive misses. Chat users are held in a queue; voice calls are transferred with `<Dial>`. |
-| **Production hygiene** | Webhook signature verification (WhatsApp HMAC-SHA256, Twilio HMAC-SHA1), idempotent handling of retried webhooks, fast 200 + background send for WhatsApp, PII redaction (phones, emails, card numbers) before logging, per-channel length limits, 30-minute session expiry. |
-| **Account insights** | `GET /brands/{id}/insights`: conversations, containment rate, handoff rate, fallback rate, p95 latency, usage by channel, top intents, and the **top unanswered questions** (the list to grow the knowledge base from). |
+| FAQ questions answered correctly | 25 / 30 (83%) |
+| ...or the right answer offered as a button | 28 / 30 (93%) |
+| When it answers, how often it's right | 96% |
+| Answered with the wrong FAQ | 1 / 30 (3.3%) |
+| Off-topic messages it correctly didn't answer | 7 / 9 |
+| Order tracking, handoff and greeting flows | 9 / 9 |
 
-## Results
+**One honest note:** my first run on the test set got 80% instead of 83%. Looking at the misses, "when is my bill due" scored exactly 0. It turned out scikit-learn's built-in stop-word list includes the word "bill" (and also "call", "back" and "system", which is bad for a telecom bot). I replaced it with my own list and re-ran the test set once. I didn't change anything else after seeing test results.
 
-Routing was evaluated offline on hand-labelled messages written to be different from the FAQ wording, including typos, Hinglish and out-of-scope requests (`eval/`). Thresholds were tuned on the **dev** set only; the **test** set is held out.
+It still gets some things wrong. "how do i make biryani" matches the cancel-order FAQ, and "what is the stock price today" matches the membership one. That's the limit of matching on words instead of meaning. Run `python -m eval.run_eval` to see every miss.
 
-| Metric (held-out test set, n = 48) | Score |
-|---|---|
-| Correct FAQ answered directly | **83.3%** (25 / 30) |
-| Correct FAQ answered or offered as a clarify button | **93.3%** (28 / 30) |
-| Precision when the bot answers | **96.2%** |
-| Wrong-answer rate (answered with the wrong policy) | **3.3%** (1 / 30) |
-| Out-of-scope messages correctly not answered | **77.8%** (7 / 9) |
-| Order-status, handoff and greeting flows | **100%** (9 / 9) |
-
-The design deliberately trades some coverage for a low wrong-answer rate: telling a customer the wrong refund policy is worse than asking a clarifying question.
-
-**Transparency note:** the first test run scored 80.0% / 96.0% / 3.3%. One miss ("when is my bill due" scoring 0) exposed a bug: scikit-learn's built-in stop-word list contains "bill". It was replaced with a hand-written list and the test set was re-run once. No other changes were made after looking at test results.
-
-**Known misses** (`python -m eval.run_eval` prints them): "how do i make biryani" matched the cancel-order FAQ, and "stock price" matched the membership FAQ. Both are lexical false positives that sentence embeddings or the LLM's `NOT_FOUND` check would catch.
-
-## Run it
+## Running it
 
 ```bash
 pip install -r requirements.txt
 
-python -m scripts.chat kirana-express             # chat in the terminal, no keys needed
+# talk to the bot in your terminal (no API keys needed)
+python -m scripts.chat kirana-express
 python -m scripts.chat nimbus-telecom --channel voice
 
-pytest -q                                         # 41 tests
-python -m eval.run_eval                           # routing metrics on the held-out set
-python -m eval.run_eval --sweep                   # threshold grid search on dev
+# tests and evaluation
+pytest -q
+python -m eval.run_eval                 # held-out test set
+python -m eval.run_eval --split dev
+python -m eval.run_eval --sweep         # try different thresholds on the dev set
 
-uvicorn app.main:app --reload                     # API docs at http://localhost:8000/docs
+# start the API (docs at http://localhost:8000/docs)
+uvicorn app.main:app --reload
 ```
 
-Or with Docker: `docker build -t brand-assistant . && docker run -p 8000:8000 --env-file .env brand-assistant`
+Keys go in a `.env` file. Copy `.env.example` and fill in only what you need; everything is optional.
 
-### Connect a real WhatsApp number (free test number)
-1. Create an app at developers.facebook.com, add the **WhatsApp** product, and copy the temporary token and test phone number ID.
-2. Expose your server: `ngrok http 8000`.
-3. Webhook URL: `https://<ngrok-id>.ngrok.app/webhooks/whatsapp/kirana-express`, verify token = `WHATSAPP_VERIFY_TOKEN`. Subscribe to `messages`.
-4. Put `WHATSAPP_TOKEN` and `WHATSAPP_APP_SECRET` in `.env` and set the brand's `phone_number_id`.
+Docker also works: `docker build -t brand-assistant . && docker run -p 8000:8000 --env-file .env brand-assistant`
 
-### Connect voice (Twilio trial)
-Set the phone number's "A call comes in" webhook to `https://<ngrok-id>.ngrok.app/webhooks/voice/kirana-express` (HTTP POST) and put `TWILIO_AUTH_TOKEN` in `.env`.
+### Hooking up real WhatsApp
+
+Meta gives you a free test number, which is enough to try this on your own phone.
+
+1. Make an app on developers.facebook.com and add WhatsApp to it. Copy the temporary access token and the phone number ID.
+2. Run `ngrok http 8000` so Meta can reach your laptop.
+3. Set the webhook URL to `https://<your-ngrok-url>/webhooks/whatsapp/kirana-express` and the verify token to whatever you put in `WHATSAPP_VERIFY_TOKEN`. Subscribe to `messages`.
+4. Put `WHATSAPP_TOKEN` and `WHATSAPP_APP_SECRET` in `.env`, and the phone number ID in the brand's YAML.
+
+### Phone calls
+
+With a Twilio trial number, set "A call comes in" to `https://<your-ngrok-url>/webhooks/voice/kirana-express` (POST) and add `TWILIO_AUTH_TOKEN` to `.env`. Twilio turns speech into text, the bot replies, and Twilio reads the reply out. If the caller asks for a person, the call gets transferred to the number in the brand's config.
 
 ### RCS
-`/webhooks/rcs/{brand}` accepts Google RBM Pub/Sub push events and returns the `contentMessage` body to send. Sending needs a Google RBM service account, so delivery is left to the RBM client library.
 
-## Add a brand
-Copy `brands/kirana-express.yaml`, change the persona, FAQs and order-ID pattern, then add a few labelled lines to `eval/dev.jsonl` and run the eval. After launch, review `top_unanswered` in the insights report and add those questions as FAQ examples.
+`/webhooks/rcs/{brand}` reads Google's RCS Business Messaging events and builds the reply. I didn't do the sending part, because that needs a Google service account, which I don't have.
 
-## API
+## Things I made sure to handle
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/health` | Status, loaded brands, LLM on/off |
-| POST | `/chat/{brand}` | JSON chat endpoint for testing / web widget |
-| GET, POST | `/webhooks/whatsapp/{brand}` | Meta verification and inbound messages |
-| POST | `/webhooks/rcs/{brand}` | RBM inbound events |
-| POST | `/webhooks/voice/{brand}` | Twilio call turns, returns TwiML |
-| GET | `/brands/{brand}/insights` | Account metrics |
+These aren't exciting, but a real deployment breaks without them:
 
-## Project layout
+- **Checking webhooks are real.** WhatsApp signs requests with HMAC-SHA256 and Twilio with HMAC-SHA1. Requests with a bad signature get a 401.
+- **Duplicate messages.** Each message ID is stored, so a retried webhook doesn't make the bot reply twice.
+- **Replying fast to WhatsApp.** The webhook returns right away and the actual reply is sent in the background, otherwise Meta thinks the request failed and retries.
+- **Personal info.** Phone numbers, emails and card numbers are masked before anything is saved.
+- **Channel limits.** WhatsApp allows 3 buttons with 20-character titles, and RCS chips allow 25 characters. Voice replies are cut to two sentences, since nobody wants to listen to a paragraph.
+- **Sessions expire** after 30 minutes, so someone coming back the next day doesn't get stuck mid-conversation.
+
+## Insights for the brand
+
+`GET /brands/{brand}/insights` returns how many conversations the bot handled on its own, how often it handed off to a human, how often it gave up, response time, and usage by channel.
+
+The most useful part is **top unanswered questions**. It's basically a to-do list for what to add to the FAQs next.
+
+## Adding a new brand
+
+Copy `brands/kirana-express.yaml`, change the persona, FAQs and order-ID format, add some test messages to `eval/dev.jsonl`, and run the eval to check nothing is badly off.
+
+## Folder structure
+
 ```
-app/engine.py        decision logic shared by all channels
-app/knowledge.py     normalisation + TF-IDF retrieval
-app/channels/        whatsapp.py, rcs.py, voice.py (parse, verify, format)
-app/store.py         SQLite sessions, dedupe, redacted log, insights
-app/llm.py           optional grounded rephrasing with safe fallback
+app/engine.py        decides what to do with each message
+app/knowledge.py     FAQ search + Hinglish/typo handling
+app/channels/        whatsapp.py, rcs.py, voice.py
+app/store.py         SQLite: sessions, duplicate check, logs, insights
+app/llm.py           optional LLM rewording
 app/main.py          FastAPI routes
-brands/              one YAML per client
-eval/                dev/test sets and evaluation script
-tests/               unit, channel and API tests
+brands/              one YAML file per brand
+eval/                test messages + evaluation script
+tests/               41 tests
+scripts/chat.py      terminal chat
 ```
 
-## Limitations and next steps
-- Channel adapters are tested against the documented payload formats and signature schemes, not yet against a production WhatsApp Business account.
-- TF-IDF matches words, not meaning. Next step: sentence embeddings (e.g. `all-MiniLM-L6-v2`) with the same thresholds, compared on the same eval sets.
-- Handoff holds chat users in a queue but does not yet push the conversation to an agent inbox (e.g. a Freshdesk/Zendesk ticket).
-- Single-process SQLite; move to Postgres + Redis for sessions at scale.
+## What's missing / what I'd do next
+
+- I've tested the channel code against Meta's and Twilio's documented formats, but not on a live business account yet.
+- Swapping TF-IDF for sentence embeddings would fix the "biryani" type mistakes. The eval sets are already there to compare the two fairly.
+- Handoff currently just parks the user. A real version would create a ticket in something like Freshdesk or Zendesk so an agent actually sees it.
+- SQLite is fine for a demo. For real traffic I'd move to Postgres, with Redis for sessions.
